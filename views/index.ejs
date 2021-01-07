@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Where is it x?</title>
+		
+		<script src="index.js"></script>
+		<link rel="icon" type="image/png" href="favicon.png">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" 
+		integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+		<link rel="stylesheet" href="index.css">
+
+		<script src="//code.jquery.com/jquery-3.4.1.js"></script>
+		<script src="//unpkg.com/bootstrap@4.3.1/dist/js/bootstrap.bundle.min.js"></script>
+	</head>
+
+	<body>
+		<!-- TODO: Add cloud SVG with project name if/when it works -->
+		<!--<a href="https://github.com/ajmeese7/soundcloud-chains">
+			<img src="Banner.png" id="banner" alt="README ASCII" />
+		</a>-->
+
+		<div id="userInput">
+			<div id="orderGroup" class="input-group">
+				<!-- TODO: Type checking on inpuit to ensuire min <= max -->
+				<label for="minTemp">Min Temp</label>
+				<input id="minTemp" class="form-control" type="number" required="required" placeholder="49" />
+				<label for="maxTemp">Max Temp</label>
+				<input id="maxTemp" class="form-control" type="number" required="required" placeholder="55" />
+				<!-- TODO: Eventually add the additional system choice, Fahrenheit vs Celsius -->
+			</div>
+
+			<div id="buttons">
+				<button type="button" id="findButton" class="btn btn-outline-dark" 
+					onclick="findLocations()">Find locations!</button>
+			</div>
+		</div>
+
+		<div id="results"></div>
+
+		<div class="d-flex justify-content-center">
+			<div class="spinner-border" role="status">
+			  <span class="sr-only">Loading...</span>
+			</div>
+		</div>
+	</body>
+</html>
