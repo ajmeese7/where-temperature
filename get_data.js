@@ -1,19 +1,11 @@
 require('dotenv').config();
 const apiKey = process.env.OPEN_WEATHER_MAP_API_KEY;
-
-// https://stackoverflow.com/a/22076667/6456163
-const HttpClient = function() {
-	this.get = function(aUrl, aCallback) {
-		var anHttpRequest = new XMLHttpRequest();
-		anHttpRequest.onreadystatechange = function() { 
-			if (anHttpRequest.readyState == 4 && anHttpRequest.status == 200)
-				aCallback(anHttpRequest.responseText);
-		}
-
-		anHttpRequest.open( "GET", aUrl, true );            
-		anHttpRequest.send( null );
-	}
-}
+const request = require('request');
+const { Pool } = require('pg');
+const pool = new Pool({
+	connectionString: process.env.DATABASE_URL,
+	ssl: { rejectUnauthorized: false }
+});
 
 // 50 biggest cities in the US, a rather diverse
 const cities = [
@@ -67,26 +59,44 @@ const cities = [
 	'Tampa',
 	'Arlington',
 	'New Orleans',
-]
+];
 
-console.log("Beginning to gather city data...");
+(async () => {
+	console.log("Beginning to gather city data...");
+	async function gatherWeatherData() {
+		let weatherData = [];
 
-let weatherData = [];
-const client = new HttpClient();
-for (let i = 0; i < cities.length; i++) {
-	// Note: gonna need list[0].name and list[0].main.temp
-	let url = `api.openweathermap.org/data/2.5/weather?q=${encodeURI(cities[i])}&appid=${apiKey}&units=imperial`;
-	client.get(url, function(response) {
-		response = JSON.parse(response);
-		let name = response.name;
-		let temp = response.main.temp;
-		let cityData = { name: name, temp: temp, };
-		weatherData.push(cityData);
+		for (let i = 0; i < /*cities.length*/ 3; i++) {
+			let url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURI(cities[i])}&appid=${apiKey}&units=imperial`;
+
+			// IDEA: Switch these to the bulk 20 at a time requests
+			// for a more performant system. Only reason I haven't yet is
+			// because you need the city ID's, and that's more of a pain.
+			await request(url, { json: true }, (err, res, body) => {
+				if (err) { return console.error(err); }
+
+				// TODO: Figure out the bottleneck and why body.main is
+				// null as the number of requests increases.
+				let cityData = { name: body.name, temp: body.main.temp, };
+				weatherData.push(cityData);
+			});
+		}
+
+		return weatherData;
+	}
+
+	await gatherWeatherData().then(data => {
+		console.log("Weather data retrieved:", data);
+		addToDatabase(data);
 	});
-}
 
-console.log("City data all retrieved! Returning now...");
-url = `https://where-temperature.herokuapp.com/addToDatabase?WeatherData=${JSON.stringify(weatherData)}`;
-client.get(url, function(response) {
-	console.log("Population request successfully sent to /addToDatabase!");
-});
+	async function addToDatabase(weatherData) {
+		// https://stackoverflow.com/a/36739415/6456163
+		const client = await pool.connect();
+		await client.query(`UPDATE data SET weather_data='${JSON.stringify(weatherData)}'
+			WHERE id=(SELECT MAX(id) FROM data);`)
+			.then(result => console.log("Successfully added to database!"))
+			.catch(err => console.error(err))
+			.finally(() => client.end());
+	}
+})();

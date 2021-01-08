@@ -31,7 +31,7 @@ function getOldWeatherData(client) {
       .catch(err => console.error(err))
       .finally(() => client.end());
 
-    return result ? result.weather_data : 0;
+    return result ? result.weather_data : null;
   }
 
   return (async () => await data() )();

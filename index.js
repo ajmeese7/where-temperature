@@ -27,6 +27,8 @@ app
 	.get('/getWeatherData', async (req, res) => {
 		let client = await pool.connect();
 		const [lastDate, weatherData] = await weather.get(client);
+		const lastDateObject = new Date(lastDate);
+		client = await pool.connect();
 		const oldWeatherData = await weather.getOld(client);
 		console.log("Weather data:", weatherData);
 		console.log("OLD weather data:", oldWeatherData);
@@ -38,10 +40,8 @@ app
 
 		// Doesn't insert the menu if it is a weekend or the same date as the last one;
 		// NOTE/TODO: Will probably have to adjust to be the same millis format on both
-		console.log("LAST DATE:", lastDate);
-		console.log("Last date NOW:", lastDate.now());
 		const currentDate = new Date();
-		if (lastDate && lastDate.now() + 300000 < currentDate.now()) {
+		if (lastDate && lastDateObject.getTime() + 300000 < currentDate.getTime()) {
 			// If data is less than 5 minutes old, send without retrieving more
 			console.log("The latest weather data is available! Sending now...");
 			return res.send(weatherData);
@@ -55,7 +55,7 @@ app
 			// TODO: Retrieve new data here, then use same callback method.
 			// How do I send the data to the user though, in the browser
 			// without async?
-			await weather.setRecordingStatus(client);
+			await weather.setDataStatus(client);
 			require('child_process').fork('get_data.js');
 			console.log("Making API call to get latest weather data...");
 
@@ -64,6 +64,7 @@ app
 		}
 	})
 	.get('/addToDatabase', async (req, res) => {
+		console.log("Adding to database...");
 		let weatherData = req.query.WeatherData;
 		if (!weatherData) return res.render('error');
 		res.send(null); // Prevents timeout error from showing in logs
@@ -72,7 +73,7 @@ app
 		const client = await pool.connect();
 		await client.query(`UPDATE data SET weather_data='${weatherData}', 
 			WHERE id=(SELECT MAX(id) FROM data);`)
-			.then(result => {})
+			.then(result => console.log("Successfully added to database!", result))
 			.catch(err => console.error(err))
 			.finally(() => client.end());
 	})

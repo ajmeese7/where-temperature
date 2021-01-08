@@ -16,9 +16,9 @@ function findLocations() {
 	let spinner = document.getElementsByClassName("spinner-border")[0];
 	spinner.style.display = 'block';
 
-	let results = document.getElementById("matches");
+	let results = document.getElementById("results");
+	results.innerHTML = '';
 	results.style.display = 'none';
-	//results.style.visibility = "hidden";
 
 	// NOTE: Can eventually add location as a param here if desired
 	let minTemp = document.getElementById("minTemp").value;
@@ -28,43 +28,34 @@ function findLocations() {
 
 	const client = new HttpClient();
 	client.get(url, function(response) {
-		console.log("RESPONSE to findLocations .get():", response);
-		if (!response) console.log("Response is showing as NULL!!!");
-		
 		let matches = [], nonmatches = [];
 		if (response) {
 			response = JSON.parse(response);
 			response.forEach(location => {
-				// IDEA: Split into matches and non-matches, and if matches is null, go with the
-				// closest absolute value in the non-matches as a suggestion
-				const [name, temperature] = location;
-				console.log(`Name: ${name}, Temperature: ${temperature}`);
-
-				// TODO: Test logic
+				const temperature = location.temp;
 				(temperature >= minTemp && temperature <= maxTemp) ? matches.push(location) : nonmatches.push(location);
 			});
 
 			if (matches.length > 0) {
 				matches.forEach((match) => {
-					const [name, temperature] = match;
 					results.innerHTML += `
-						<p>Name: ${name}</p>
-						<p>Temp: ${temperature}</p>
+						<p>Name: ${match.name}</p>
+						<p>Temp: ${match.temp}</p>
 					`;
 				});
 			} else {
 				// https://stackoverflow.com/a/48236643/6456163
+				const middleOfRange = minTemp + maxTemp / 2;
 				nonmatches.sort(function(a, b) {
-					return Math.abs(num-a) - Math.abs(num-b);
+					return Math.abs(middleOfRange - a) - Math.abs(middleOfRange - b);
 				});
+
 				nonmatches = nonmatches.slice(0, 5);
 				results.innerHTML += "<p>No results match the criteria! Here are the closest temperatures to your desired range:</p>";
-				
 				nonmatches.forEach((match) => {
-					const [name, temperature] = match;
 					results.innerHTML += `
-						<p>Name: ${name}</p>
-						<p>Temp: ${temperature}</p>
+						<p>Name: ${match.name}</p>
+						<p>Temp: ${match.temp}</p>
 					`;
 				});
 			}

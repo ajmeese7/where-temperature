@@ -14,7 +14,7 @@
     "express": "^4.17.1",
     "node-fetch": "^2.6.1",
     "pg": "^8.3.0",
-    "xmlhttprequest": "1.8.0"
+    "request": "^2.88.2"
   },
   "devDependencies": {
     "nodemon": "^2.0.4"
