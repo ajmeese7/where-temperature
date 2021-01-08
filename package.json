@@ -1,0 +1,36 @@
+{
+  "name": "where-temperature",
+  "version": "0.0.1",
+  "description": "Locate where in the world it is currently your desired temperature.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "devstart": "nodemon index.js -e js,ejs,json,css",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "ejs": "^3.1.3",
+    "express": "^4.17.1",
+    "node-fetch": "^2.6.1",
+    "pg": "^8.3.0",
+    "request": "^2.88.2"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.4"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ajmeese7/where-temperature.git"
+  },
+  "keywords": [
+    "where",
+    "temperature"
+  ],
+  "author": "Aaron Meese",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ajmeese7/where-temperature/issues"
+  },
+  "homepage": "https://github.com/ajmeese7/where-temperature#readme"
+}
