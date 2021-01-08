@@ -22,7 +22,6 @@ function getWeatherData(client) {
   return (async () => await data() )();
 }
 
-// TODO: Can the `const data` be abstracted to a function?
 function getOldWeatherData(client) {
   const data = async () => {
     var result;

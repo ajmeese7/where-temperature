@@ -44,3 +44,6 @@ filling in your server's information where appropriate.
 You should create a `.env` file with the following values assigned:
 - DATABASE_URL
 - OPEN_WEATHER_MAP_API_KEY
+	- This project uses the [Current Weather API](https://openweathermap.org/current#min) from
+	Open Weather Map to get the weather data.
+	- You can sign up for a free API key [here](https://home.openweathermap.org/api_keys).

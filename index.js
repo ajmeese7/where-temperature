@@ -30,38 +30,30 @@ app
 		const lastDateObject = new Date(lastDate);
 		client = await pool.connect();
 		const oldWeatherData = await weather.getOld(client);
-		console.log("Weather data:", weatherData);
-		console.log("OLD weather data:", oldWeatherData);
 
 		if (weatherData == "IN PROGRESS") {
 			console.log("Current weather API call already in progress. Sending old data...");
 			return res.send(oldWeatherData);
 		}
 
-		// Doesn't insert the menu if it is a weekend or the same date as the last one;
-		// NOTE/TODO: Will probably have to adjust to be the same millis format on both
 		const currentDate = new Date();
 		if (lastDate && lastDateObject.getTime() + 300000 < currentDate.getTime()) {
 			// If data is less than 5 minutes old, send without retrieving more
 			console.log("The latest weather data is available! Sending now...");
 			return res.send(weatherData);
-		} else {
-			if (!lastDate)
-				console.log("First time running, so no data yet! Initial population, nothing will be returned...");
-
-			// Makes the call to get new data if older than 5 minutes
-			client = await pool.connect();
-
-			// TODO: Retrieve new data here, then use same callback method.
-			// How do I send the data to the user though, in the browser
-			// without async?
-			await weather.setDataStatus(client);
-			require('child_process').fork('get_data.js');
-			console.log("Making API call to get latest weather data...");
-
-			// Send old data, which will be null on initial population
-			return res.send(oldWeatherData);
 		}
+
+		if (!lastDate)
+			console.log("First time running, so no data yet! Initial population, nothing will be returned...");
+
+		// Makes the call to get new data if older than 5 minutes
+		console.log("Making API call to get latest weather data...");
+		client = await pool.connect();
+		await weather.setDataStatus(client);
+		require('child_process').fork('get_data.js');
+
+		// Send old data, which will be null on initial population
+		return res.send(oldWeatherData);
 	})
 	.get('/addToDatabase', async (req, res) => {
 		console.log("Adding to database...");
