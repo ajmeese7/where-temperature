@@ -51,6 +51,7 @@ button:disabled {
 #results {
 	width: 266px;
 	margin: auto;
+	margin-bottom: 10px;
 }
 label {
 	font-weight: 500;
