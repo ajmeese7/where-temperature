@@ -21,6 +21,9 @@
 </p>
 
 <p align="center">Find a location that is currently in your desired temperature range.</p>
+<p align="center">
+<img alt="Project Preview" title="Project Preview" src="./public/Cloud.png" />
+</p>
 
 ## Developing
 You can replicate the PostgreSQL table structure by running the following query
@@ -47,3 +50,9 @@ You should create a `.env` file with the following values assigned:
 	- This project uses the [Current Weather API](https://openweathermap.org/current#min) from
 	Open Weather Map to get the weather data.
 	- You can sign up for a free API key [here](https://home.openweathermap.org/api_keys).
+
+**NOTE:** The project is coded to retrieve new data if the Postgres data is older
+than five minutes. However, the server's time zone may differ from yours, so it may
+unnecessarily retrieve new data, or it may not gather new data when it should. I
+am currently unaware of an easy solution to this, without gathering new data on
+automatic intervals, so suggestions are welcome.

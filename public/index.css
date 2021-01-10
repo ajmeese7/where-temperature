@@ -12,12 +12,12 @@ body {
 }
 
 #banner {
-	max-width: 80%;
+	max-width: 60%;
 	margin-top: 25px;
 }
-@media screen and (max-width: 1000px) {
+@media screen and (max-width: 750px) {
 	#banner {
-		max-width: 95%;
+		max-width: 80%;
 	}
 }
 
@@ -32,6 +32,7 @@ button:hover {
 }
 #buttons {
 	margin-top: 5px;
+	margin-bottom: 3px;
 }
 button:disabled {
 	cursor: not-allowed;
@@ -47,14 +48,21 @@ button:disabled {
 .form-control, #results {
 	width: 246px !important;
 }
+#results {
+	width: 266px;
+	margin: auto;
+}
 label {
 	font-weight: 500;
 	margin-bottom: .3rem;
 	margin-top: 5px;
 }
 #tempInputs {
-	width: 266px;
+	width: 246px;
 	margin: auto;
+}
+#minTemp, #maxTemp {
+	margin: 0;
 }
 
 .spinner-border {
