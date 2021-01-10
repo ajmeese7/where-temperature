@@ -24,9 +24,6 @@ body {
 #userInput {
 	margin-top: 50px !important;
 }
-#asciiText {
-	padding: 5px;
-}
 button {
 	display: inline !important;
 }
@@ -47,7 +44,7 @@ button:disabled {
 .input-group>.form-control {
 	flex: none !important;
 }
-.form-control {
+.form-control, #results {
 	width: 246px !important;
 }
 label {
@@ -55,19 +52,33 @@ label {
 	margin-bottom: .3rem;
 	margin-top: 5px;
 }
-label[for=txt-color] {
-	margin-top: 5px;
-}
-#orderGroup {
+#tempInputs {
 	width: 266px;
 	margin: auto;
-}
-#background-color {
-	margin-top: 5px;
-	margin-bottom: 7.5px;
 }
 
 .spinner-border {
 	margin-top: 60px;
 	display: none;
+}
+
+.result {
+	background-color: lightgray;
+	border-radius: .25rem;
+}
+#noResultsTop {
+	margin-top: 5px;
+	margin-bottom: 2.5px;
+}
+.cityName, .cityTemp {
+	line-height: 20px;
+	margin-top: 4px;
+	margin-bottom: 0px;
+	padding-left: 5px;
+}
+.cityName {
+	padding-top: 3px;
+}
+.cityTemp {
+	padding-bottom: 3px;
 }

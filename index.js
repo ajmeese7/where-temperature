@@ -37,7 +37,7 @@ app
 		}
 
 		const currentDate = new Date();
-		if (lastDate && lastDateObject.getTime() + 300000 < currentDate.getTime()) {
+		if (lastDate && lastDateObject.getTime() > currentDate.getTime() - 300000) {
 			// If data is less than 5 minutes old, send without retrieving more
 			console.log("The latest weather data is available! Sending now...");
 			return res.send(weatherData);

@@ -11,6 +11,20 @@ document.addEventListener("DOMContentLoaded", function(event) {
 	};
 });
 
+// https://stackoverflow.com/a/22076667/6456163
+const HttpClient = function() {
+	this.get = function(aUrl, aCallback) {
+		var anHttpRequest = new XMLHttpRequest();
+		anHttpRequest.onreadystatechange = function() { 
+			if (anHttpRequest.readyState == 4 && anHttpRequest.status == 200)
+				aCallback(anHttpRequest.responseText);
+		}
+
+		anHttpRequest.open( "GET", aUrl, true );            
+		anHttpRequest.send( null );
+	}
+}
+
 function findLocations() {
 	// Unhide loader and hide previous results
 	let spinner = document.getElementsByClassName("spinner-border")[0];
@@ -37,27 +51,18 @@ function findLocations() {
 			});
 
 			if (matches.length > 0) {
-				matches.forEach((match) => {
-					results.innerHTML += `
-						<p>Name: ${match.name}</p>
-						<p>Temp: ${match.temp}</p>
-					`;
-				});
+				matches.forEach(match => results.innerHTML += resultCode(match));
 			} else {
 				// https://stackoverflow.com/a/48236643/6456163
-				const middleOfRange = minTemp + maxTemp / 2;
-				nonmatches.sort(function(a, b) {
-					return Math.abs(middleOfRange - a) - Math.abs(middleOfRange - b);
-				});
-
+				const middleOfRange = (minTemp*1 + maxTemp*1) / 2;
+				nonmatches.sort((a, b) => a.temp - middleOfRange - b.temp - middleOfRange);
 				nonmatches = nonmatches.slice(0, 5);
-				results.innerHTML += "<p>No results match the criteria! Here are the closest temperatures to your desired range:</p>";
-				nonmatches.forEach((match) => {
-					results.innerHTML += `
-						<p>Name: ${match.name}</p>
-						<p>Temp: ${match.temp}</p>
-					`;
-				});
+
+				results.innerHTML += `
+					<p id='noResultsTop'>No results match the criteria!</p>
+					<p>Here are the closest temperatures to your desired range:</p>
+				`;
+				nonmatches.forEach(match => results.innerHTML += resultCode(match));
 			}
 		} else {
 			// For initial population, need to retrieve the new data
@@ -71,16 +76,9 @@ function findLocations() {
 	});
 }
 
-// https://stackoverflow.com/a/22076667/6456163
-const HttpClient = function() {
-	this.get = function(aUrl, aCallback) {
-		var anHttpRequest = new XMLHttpRequest();
-		anHttpRequest.onreadystatechange = function() { 
-			if (anHttpRequest.readyState == 4 && anHttpRequest.status == 200)
-				aCallback(anHttpRequest.responseText);
-		}
-
-		anHttpRequest.open( "GET", aUrl, true );            
-		anHttpRequest.send( null );
-	}
-}
+const resultCode = (match) => `
+	<div class="result">
+		<p class="cityName">Name: <b>${match.name}</b></p>
+		<p class="cityTemp">Temp: <b>${match.temp}°F</b></p>
+	</div>
+`;

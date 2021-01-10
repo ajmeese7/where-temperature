@@ -1,13 +1,19 @@
 require('dotenv').config();
 const apiKey = process.env.OPEN_WEATHER_MAP_API_KEY;
-const request = require('request');
+const axios = require('axios').default;
 const { Pool } = require('pg');
 const pool = new Pool({
 	connectionString: process.env.DATABASE_URL,
 	ssl: { rejectUnauthorized: false }
 });
 
-// 50 biggest cities in the US, a rather diverse
+var Bottleneck = require('bottleneck');
+const limiter = new Bottleneck({
+  maxConcurrent: 1,
+  minTime: 500,
+});
+
+// Biggest cities in the US, a rather diverse selection
 const cities = [
 	'New York City',
 	'Los Angeles',
@@ -41,7 +47,6 @@ const cities = [
 	'Baltimore',
 	'Milwaukee',
 	'Albuquerque',
-	'Tuscon',
 	'Fresno',
 	'Mesa',
 	'Sacramento',
@@ -61,42 +66,34 @@ const cities = [
 	'New Orleans',
 ];
 
-(async () => {
-	console.log("Beginning to gather city data...");
-	async function gatherWeatherData() {
-		let weatherData = [];
+console.log("Beginning to gather city data...");
+const weatherData = [];
 
-		for (let i = 0; i < /*cities.length*/ 3; i++) {
-			let url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURI(cities[i])}&appid=${apiKey}&units=imperial`;
+limiter.schedule(() => {
+	const allTasks = cities.map(city => getCityData(city));
+	return Promise.all(allTasks);
+})
+.then(() => {
+	addToDatabase(weatherData);
+});
 
-			// IDEA: Switch these to the bulk 20 at a time requests
-			// for a more performant system. Only reason I haven't yet is
-			// because you need the city ID's, and that's more of a pain.
-			await request(url, { json: true }, (err, res, body) => {
-				if (err) { return console.error(err); }
+async function getCityData(city) {
+	try {
+    let url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURI(city)}&appid=${apiKey}&units=imperial`;
+		const res = await axios.get(url);
+		let cityData = { name: res.data.name, temp: res.data.main.temp, };
+		weatherData.push(cityData);
+  } catch (error) {
+		console.error(`Problem with city ${city}!`);
+  }
+}
 
-				// TODO: Figure out the bottleneck and why body.main is
-				// null as the number of requests increases.
-				let cityData = { name: body.name, temp: body.main.temp, };
-				weatherData.push(cityData);
-			});
-		}
-
-		return weatherData;
-	}
-
-	await gatherWeatherData().then(data => {
-		console.log("Weather data retrieved:", data);
-		addToDatabase(data);
-	});
-
-	async function addToDatabase(weatherData) {
-		// https://stackoverflow.com/a/36739415/6456163
-		const client = await pool.connect();
-		await client.query(`UPDATE data SET weather_data='${JSON.stringify(weatherData)}'
-			WHERE id=(SELECT MAX(id) FROM data);`)
-			.then(result => console.log("Successfully added to database!"))
-			.catch(err => console.error(err))
-			.finally(() => client.end());
-	}
-})();
+async function addToDatabase(weatherData) {
+	// https://stackoverflow.com/a/36739415/6456163
+	const client = await pool.connect();
+	await client.query(`UPDATE data SET weather_data='${JSON.stringify(weatherData)}'
+		WHERE id=(SELECT MAX(id) FROM data);`)
+		.then(result => console.log("Successfully added to database!"))
+		.catch(err => console.error(err))
+		.finally(() => client.end());
+}
